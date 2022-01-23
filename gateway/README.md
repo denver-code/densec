@@ -12,9 +12,21 @@ To source it:
 ```
 ## Run gateway server
 > [!NOTE]
-> We used python 3.10.1 64-bit version!
+> We used python 3.10.1 64-bit version!  
 > And don't forget to change your .env settings!
 ``` Bash
 $ pip3 install -r requirements.txt
 $ python3 gateway.py
+```
+
+## Run gateway in docker with scripts
+> [!NOTE]  
+> Install docker  
+``` Bash
+$ sudo sh scripts/run_gateway.sh
+```
+
+## Run gateway in docker with docker-compose
+``` Bash
+$ sudo docker-compose up --build -d
 ```
