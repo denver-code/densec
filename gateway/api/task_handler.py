@@ -2,17 +2,33 @@ from api.database import Database
 
 class Task():
     def __init__(self):
-        self.avaible_tasks = ["serverping"]
+        self.avaible_tasks = ["serverping", "getservers"]
+
 
     def dynamic_call(self, attribute_name, logging, socks, parsed_data):
         method_name = 'task_' + attribute_name
         func = getattr(self, method_name) 
         return func(logging, socks, parsed_data)  
 
+
     def new_task(self, method):
         if method == "test":
             return Database().create_task({"method":"test", "creator":"root"})
     
+    
+    def task_getservers(self, logging, socks, parsed_data):
+        '''
+        Sample of request - {"type":"client","task":"getservers"}
+        '''
+        servers = Database().get_all_servers()
+        if servers:
+            msg = {"statuscode":200,"data":servers}
+        else:
+            msg = {"statuscode":204,"message":"No active servers :("}
+        logging.info(f"{socks.getpeername()[0]} - {msg=}")
+        return msg
+
+
     def task_serverping(self, logging, socks, parsed_data):
         ''' 
         Sample of request - {"type":"client","task":"ping"}
@@ -20,6 +36,7 @@ class Task():
         msg = {"statuscode":200,"message":"pong!"}
         logging.info(f"{socks.getpeername()[0]} - {msg=}")
         return msg
+
 
     def task_process(self, logging, socks, parsed_data):
         if "type" in parsed_data :
