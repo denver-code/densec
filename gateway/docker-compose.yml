@@ -5,6 +5,5 @@ services:
     network_mode: "host"  
     volumes:
       - .:/gateway
-    # image: gateway:latest
     ports:
       - "9090:9090"
