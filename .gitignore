@@ -152,3 +152,4 @@ cython_debug/
 #.idea/
 
 .log
+gateway/test.py
