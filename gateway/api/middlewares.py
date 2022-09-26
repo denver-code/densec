@@ -4,7 +4,7 @@ def client_only(function):
 
     @wraps(function)
     def wrapper(*args, **kwargs):
-        if args[-1] == "client":
+        if args[-1]["type"] == "client":
             return function(*args, **kwargs)
         errmsg = f"Server {args[-2].getpeername()[0]} attempt access to client function!"
         args[-3].error(errmsg)
@@ -14,10 +14,9 @@ def client_only(function):
 
 
 def server_only(function):
-
     @wraps(function)
     def wrapper(*args, **kwargs):
-        if args[-1] == "server":
+        if args[-1]["type"] == "server":
             return function(*args, **kwargs)
         errmsg = f"Client {args[-2].getpeername()[0]} attempt access to client function!"
         args[-3].error(errmsg)
