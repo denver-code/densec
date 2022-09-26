@@ -1,11 +1,16 @@
 import uuid
+import os
 
 from api.database import Database
 from api.middlewares import client_only, server_only
+from dotenv import load_dotenv
+
+load_dotenv()
 
 class Task():
     def __init__(self):
-        self.avaible_tasks = ["serverping", "getservers", "activateserver", "generate_uuid"]
+        self.avaible_tasks = ["ping", "getservers", "generate_uuid"]
+        self.SECRET_KEY = os.getenv("SECRET_KEY")
 
 
     def dynamic_call(self, attribute_name, logging, socks, parsed_data):
@@ -14,11 +19,13 @@ class Task():
         return func(logging, socks, parsed_data)  
 
 
-    def new_task(self, method):
-        if method == "test":
-            return Database().create_task({"method":"test", "creator":"root"})
-    
-    
+    # @client_only
+    # def task_shutdown(self, logging, socks, parsed_data):
+    #     '''
+    #     Sample of request - {"type":"client","task":"shutdown","Authorization":"None"}
+    #     '''
+
+
     @client_only
     def task_getservers(self, logging, socks, parsed_data):
         '''
@@ -42,28 +49,7 @@ class Task():
         return {"statuscode":200,"data":{"uuid":uuid4}}
 
 
-    @server_only
-    def task_activateserver(self, logging, socks, parsed_data):
-        ''' 
-        Sample of request - {"type":"server","task":"activateserver","uid":"ce13ddec-7c93-11ec-90d6-0242ac120003"}
-        '''
-        if "uid" not in parsed_data:
-            errmsg = {"statuscode":400, "reason":"Your client don't have 'uid' in parsed_data!"}
-            logging.error(f"{socks.getpeername()[0]} - {errmsg=}")
-            return errmsg
-
-        logging.info(f"Get request activateserver from server {socks.getpeername()[0]}")
-
-        return Database().active_server(
-            logging,
-            socks.getpeername()[0],
-            socks.getpeername()[1],
-            parsed_data["uid"]
-        )
-
-
-    @client_only
-    def task_serverping(self, logging, socks, parsed_data):
+    def task_ping(self, logging, socks, parsed_data):
         ''' 
         Sample of request - {"type":"client","task":"serverping"}
         '''
@@ -74,21 +60,18 @@ class Task():
 
     def task_process(self, logging, socks, parsed_data):
         if "type" in parsed_data :
-            if parsed_data["type"] in ["client", "server"]:
-                if "task" in parsed_data:
-                    if parsed_data["task"] in self.avaible_tasks: 
-                        return self.dynamic_call(parsed_data['task'], logging, socks, parsed_data)
-                    else:
-                        errmsg = {"statuscode":404, "reason":"Command not found! Your client want use unknown task."}
-                        logging.error(f"{socks.getpeername()[0]} - {errmsg=}")
-                        return errmsg
+            if "task" in parsed_data:
+                if parsed_data["task"] in self.avaible_tasks: 
+                    return self.dynamic_call(parsed_data['task'], logging, socks, parsed_data)
                 else:
-                    errmsg = {"statuscode":404, "reason":"Your client don't have 'task' in parsed_data"}
+                    errmsg = {"statuscode":404, "reason":"Command not found! You want use unknown task."}
                     logging.error(f"{socks.getpeername()[0]} - {errmsg=}")
                     return errmsg
             else:
-                return {"statuscode":400, "reason":"Your client have invalid 'type' in parsed_data"}
+                errmsg = {"statuscode":404, "reason":"You don't have 'task' in parsed_data"}
+                logging.error(f"{socks.getpeername()[0]} - {errmsg=}")
+                return errmsg
         else:
-            errmsg = {"statuscode":400, "reason":"Your client don't have 'type' in parsed_data"}
+            errmsg = {"statuscode":400, "reason":"You don't have 'type' in parsed_data"}
             logging.error(f"{socks.getpeername()[0]} - {errmsg=}")
             return errmsg
