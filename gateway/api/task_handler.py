@@ -9,7 +9,7 @@ load_dotenv()
 
 class Task():
     def __init__(self):
-        self.avaible_tasks = ["ping", "getServers", "generateUUID"]
+        self.avaible_tasks = ["ping", "get_servers", "generate_uuid"]
         self.SECRET_KEY = os.getenv("SECRET_KEY")
 
 
@@ -19,17 +19,11 @@ class Task():
         return func(logging, socks, parsed_data)  
 
 
-    # @client_only
-    # def task_shutdown(self, logging, socks, parsed_data):
-    #     '''
-    #     Sample of request - {"type":"client","task":"shutdown","Authorization":"None"}
-    #     '''
-
 
     @client_only
-    def task_getservers(self, logging, socks, parsed_data):
+    def task_get_servers(self, logging, socks, parsed_data):
         '''
-        Sample of request - {"type":"client","task":"getServers"}
+        Sample of request - {"type":"client","task":"get_servers"}
         '''
         servers = Database().get_all_servers()
         if servers:
@@ -42,7 +36,7 @@ class Task():
 
     def task_generate_uuid(self, logging, socks, parsed_data):
         '''
-        Sample of request - {"type":"client","task":"generateUUID"}
+        Sample of request - {"type":"client","task":"generate_uuid"}
         '''
         uuid4 = str(uuid.uuid4())
         logging.info(f"{socks.getpeername()[0]} generate {uuid4=}")
@@ -58,11 +52,14 @@ class Task():
         return msg
 
 
+    # def task_protected_ping()
+
+
     def task_process(self, logging, socks, parsed_data):
         if "type" in parsed_data :
             if "task" in parsed_data:
                 if parsed_data["task"] in self.avaible_tasks: 
-                    return self.dynamic_call(parsed_data['task'].lower(), logging, socks, parsed_data)
+                    return self.dynamic_call(parsed_data['task'], logging, socks, parsed_data)
                 else:
                     errmsg = {"statuscode":404, "reason":"Command not found! You want use unknown task."}
                     logging.error(f"{socks.getpeername()[0]} - {errmsg=}")
