@@ -27,9 +27,9 @@ class Task():
         '''
         servers = Database().get_all_servers()
         if servers:
-            msg = {"statuscode":200,"data":{"servers":servers}}
+            msg = {"status_code":200,"data":{"servers":servers}}
         else:
-            msg = {"statuscode":204,"message":"No active servers"}
+            msg = {"status_code":204,"message":"No active servers"}
         logging.info(f"{socks.getpeername()[0]} - {msg=}")
         return msg
 
@@ -40,14 +40,14 @@ class Task():
         '''
         uuid4 = str(uuid.uuid4())
         logging.info(f"{socks.getpeername()[0]} generate {uuid4=}")
-        return {"statuscode":200,"data":{"uuid":uuid4}}
+        return {"status_code":200,"data":{"uuid":uuid4}}
 
 
     def task_ping(self, logging, socks, parsed_data):
         ''' 
         Sample of request - {"type":"client","task":"ping"}
         '''
-        msg = {"statuscode":200,"message":"pong!"}
+        msg = {"status_code":200,"message":"pong!"}
         logging.info(f"{socks.getpeername()[0]} - {msg=}")
         return msg
 
@@ -61,14 +61,14 @@ class Task():
                 if parsed_data["task"] in self.avaible_tasks: 
                     return self.dynamic_call(parsed_data['task'], logging, socks, parsed_data)
                 else:
-                    errmsg = {"statuscode":404, "reason":"Command not found! You want use unknown task."}
+                    errmsg = {"status_code":404, "reason":"Command not found! You want use unknown task."}
                     logging.error(f"{socks.getpeername()[0]} - {errmsg=}")
                     return errmsg
             else:
-                errmsg = {"statuscode":404, "reason":"You don't have 'task' in parsed_data"}
+                errmsg = {"status_code":404, "reason":"You don't have 'task' in request"}
                 logging.error(f"{socks.getpeername()[0]} - {errmsg=}")
                 return errmsg
         else:
-            errmsg = {"statuscode":400, "reason":"You don't have 'type' in parsed_data"}
+            errmsg = {"status_code":400, "reason":"You don't have 'type' in request"}
             logging.error(f"{socks.getpeername()[0]} - {errmsg=}")
             return errmsg
